@@ -6,14 +6,19 @@
       <p class="intro">
         A production-ready Nuxt application deployed automatically to GitHub Pages.
       </p>
-      <a
-        class="button"
-        href="https://nuxt.com"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Explore Nuxt
-      </a>
+      <div class="actions">
+        <a
+          class="button secondary"
+          href="https://nuxt.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Explore Nuxt
+        </a>
+        <NuxtLink class="button" to="/sample">
+          View Sample API Page
+        </NuxtLink>
+      </div>
     </section>
   </main>
 </template>
@@ -70,6 +75,13 @@ h1 {
   opacity: 0.75;
 }
 
+.actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .button {
   display: inline-block;
   padding: 0.8rem 1.2rem;
@@ -78,5 +90,11 @@ h1 {
   color: #0b1020;
   font-weight: 700;
   text-decoration: none;
+}
+
+.button.secondary {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  color: #f8fafc;
 }
 </style>
