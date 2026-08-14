@@ -1,0 +1,30 @@
+{
+  "name": "first-nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "nuxt": "^4.0.0"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "latest",
+    "@types/node": "latest",
+    "@vue/test-utils": "latest",
+    "eslint": "latest",
+    "typescript": "latest",
+    "vue-tsc": "latest",
+    "vitest": "latest"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

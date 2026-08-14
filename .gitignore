@@ -1,0 +1,29 @@
+# Nuxt / Node
+.nuxt/
+.output/
+node_modules/
+.nitro/
+.cache/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Testing / coverage
+coverage/
+
+# TypeScript
+*.tsbuildinfo
