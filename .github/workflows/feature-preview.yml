@@ -19,9 +19,7 @@ permissions:
 env:
   NODE_VERSION: 22
 
-# Feature deployments publish a site artifact that contains the current
-# production build plus the feature under /preview/<branch>/. This keeps the
-# production URL working while exposing an isolated URL for the feature.
+# Preview deployments rebuild main and overlay this feature under /preview/<branch>/.
 concurrency:
   group: github-pages-deployment
   cancel-in-progress: false
@@ -29,7 +27,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout feature branch
         uses: actions/checkout@v4
@@ -95,7 +92,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
@@ -108,4 +104,4 @@ jobs:
           echo "**Branch:** \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "**Preview:** \`${{ steps.deployment.outputs.page_url }}preview/${{ github.ref_name }}/\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "The production site remains available at the repository Pages URL." >> "$GITHUB_STEP_SUMMARY"
+          echo "The production site is rebuilt from main before the feature overlay is published." >> "$GITHUB_STEP_SUMMARY"
