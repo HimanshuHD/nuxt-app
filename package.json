@@ -19,6 +19,8 @@
     "@nuxt/eslint": "latest",
     "@vue/test-utils": "latest",
     "eslint": "latest",
+    "typescript": "latest",
+    "vue-tsc": "latest",
     "vitest": "latest"
   },
   "engines": {
