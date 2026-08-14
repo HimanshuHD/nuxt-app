@@ -4,7 +4,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
   app: {
-    baseURL: process.env.NODE_ENV === 'production' ? '/nuxt-app/' : '/',
+    baseURL:
+      process.env.NUXT_APP_BASE_URL ||
+      (process.env.NODE_ENV === 'production' ? '/nuxt-app/' : '/'),
   },
 
   nitro: {
