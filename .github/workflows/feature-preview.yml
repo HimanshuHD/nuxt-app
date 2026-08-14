@@ -19,9 +19,6 @@ permissions:
 env:
   NODE_VERSION: 22
 
-# Feature deployments publish a site artifact that contains the current
-# production build plus the feature under /preview/<branch>/. This keeps the
-# production URL working while exposing an isolated URL for the feature.
 concurrency:
   group: github-pages-deployment
   cancel-in-progress: false
@@ -75,11 +72,13 @@ jobs:
         run: npm run generate
 
       - name: Combine production and feature preview
+        env:
+          PREVIEW_PATH: preview/${{ github.ref_name }}
         run: |
           rm -rf site
-          mkdir -p site
+          mkdir -p "site/$PREVIEW_PATH"
           cp -a ../production/.output/public/. site/
-          cp -a /tmp/feature-public/. site/
+          cp -a /tmp/feature-public/. "site/$PREVIEW_PATH/"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
