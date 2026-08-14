@@ -1,0 +1,79 @@
+name: Deploy Feature Preview
+
+on:
+  push:
+    branches:
+      - 'feat/**'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Feature branch to preview'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  NODE_VERSION: 22
+  PRODUCTION_BASE_PATH: /nuxt-app/
+
+concurrency:
+  group: feature-preview-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare Nuxt
+        run: npx nuxt prepare
+
+      - name: Generate feature preview
+        env:
+          NUXT_APP_BASE_URL: /nuxt-app/preview/${{ github.ref_name }}/
+        run: npm run generate
+
+      - name: Add preview metadata
+        run: |
+          cat > .output/public/preview-info.json <<EOF
+          {
+            "branch": "${{ github.ref_name }}",
+            "commit": "${{ github.sha }}",
+            "generatedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: feature-preview-${{ github.ref_name }}
+          path: .output/public
+          retention-days: 7
+
+      - name: Preview summary
+        run: |
+          echo "## Feature Preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Commit:** \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview artifact uploaded successfully." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "A public URL is intentionally not deployed from this workflow because GitHub Pages has one site per repository; using deploy-pages here would replace the production Pages deployment." >> "$GITHUB_STEP_SUMMARY"
