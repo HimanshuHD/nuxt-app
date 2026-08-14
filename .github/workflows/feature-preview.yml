@@ -18,31 +18,33 @@ permissions:
 
 env:
   NODE_VERSION: 22
-  PRODUCTION_BASE_PATH: /nuxt-app/
 
+# Feature deployments publish a site artifact that contains the current
+# production build plus the feature under /preview/<branch>/. This keeps the
+# production URL working while exposing an isolated URL for the feature.
 concurrency:
-  group: feature-preview-${{ github.ref_name }}
-  cancel-in-progress: true
+  group: github-pages-deployment
+  cancel-in-progress: false
 
 jobs:
-  build-preview:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
 
     steps:
       - name: Checkout feature branch
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
+      - name: Install feature dependencies
         run: npm install
 
-      - name: Prepare Nuxt
+      - name: Prepare feature Nuxt
         run: npx nuxt prepare
 
       - name: Generate feature preview
@@ -50,30 +52,60 @@ jobs:
           NUXT_APP_BASE_URL: /nuxt-app/preview/${{ github.ref_name }}/
         run: npm run generate
 
-      - name: Add preview metadata
-        run: |
-          cat > .output/public/preview-info.json <<EOF
-          {
-            "branch": "${{ github.ref_name }}",
-            "commit": "${{ github.sha }}",
-            "generatedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          }
-          EOF
+      - name: Save feature output
+        run: cp -a .output/public /tmp/feature-public
 
-      - name: Upload preview artifact
-        uses: actions/upload-artifact@v4
+      - name: Checkout main for production build
+        run: |
+          git fetch origin main
+          git worktree add ../production origin/main
+
+      - name: Install production dependencies
+        working-directory: ../production
+        run: npm install
+
+      - name: Prepare production Nuxt
+        working-directory: ../production
+        run: npx nuxt prepare
+
+      - name: Generate production site
+        working-directory: ../production
+        env:
+          NUXT_APP_BASE_URL: /nuxt-app/
+        run: npm run generate
+
+      - name: Combine production and feature preview
+        run: |
+          rm -rf site
+          mkdir -p site
+          cp -a ../production/.output/public/. site/
+          cp -a /tmp/feature-public/. site/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload combined Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: feature-preview-${{ github.ref_name }}
-          path: .output/public
-          retention-days: 7
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Preview summary
         run: |
           echo "## Feature Preview" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Branch:** \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Commit:** \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Preview:** \`${{ steps.deployment.outputs.page_url }}preview/${{ github.ref_name }}/\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Preview artifact uploaded successfully." >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "A public URL is intentionally not deployed from this workflow because GitHub Pages has one site per repository; using deploy-pages here would replace the production Pages deployment." >> "$GITHUB_STEP_SUMMARY"
+          echo "The production site remains available at the repository Pages URL." >> "$GITHUB_STEP_SUMMARY"
