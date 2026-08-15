@@ -8,14 +8,14 @@
       </p>
       <div class="actions">
         <a
-          class="button secondary"
+          class="button button--secondary"
           href="https://nuxt.com"
           target="_blank"
           rel="noopener noreferrer"
         >
           Explore Nuxt
         </a>
-        <NuxtLink class="button" to="/sample">
+        <NuxtLink class="button button--primary" to="/sample">
           View Sample API Page
         </NuxtLink>
       </div>
@@ -24,17 +24,6 @@
 </template>
 
 <style scoped>
-:global(*) {
-  box-sizing: border-box;
-}
-
-:global(body) {
-  margin: 0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #0b1020;
-  color: #f8fafc;
-}
-
 .page {
   min-height: 100vh;
   display: grid;
@@ -86,13 +75,16 @@ h1 {
   display: inline-block;
   padding: 0.8rem 1.2rem;
   border-radius: 999px;
-  background: #fff;
-  color: #0b1020;
   font-weight: 700;
   text-decoration: none;
 }
 
-.button.secondary {
+.button--primary {
+  background: #fff;
+  color: #0b1020;
+}
+
+.button--secondary {
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: transparent;
   color: #f8fafc;
