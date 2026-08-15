@@ -9,7 +9,7 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <button :class="['button', `button--${variant}]" :type="type">
+  <button :class="['button', `button--${variant}`]" :type="type">
     <slot />
   </button>
 </template>
