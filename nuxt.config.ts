@@ -3,6 +3,11 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2025-07-15',
 
+  runtimeConfig: {
+    openWeatherApiKey: '',
+    openWeatherBaseUrl: 'https://api.openweathermap.org',
+  },
+
   app: {
     baseURL:
       process.env.NUXT_APP_BASE_URL ||
