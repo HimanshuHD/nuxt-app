@@ -45,7 +45,7 @@ jobs:
 
       - name: Generate feature preview
         env:
-          NUXT_APP_BASE_URL: /nuxt-app/preview/${{ github.ref_name }}/
+          NUXT_APP_BASE_URL: /nuxt-app/preview/
         run: npm run generate
 
       - name: Save feature output
@@ -71,13 +71,11 @@ jobs:
         run: npm run generate
 
       - name: Combine production and feature preview
-        env:
-          PREVIEW_PATH: preview/${{ github.ref_name }}
         run: |
           rm -rf site
-          mkdir -p "site/$PREVIEW_PATH"
+          mkdir -p site/preview
           cp -a ../production/.output/public/. site/
-          cp -a /tmp/feature-public/. "site/$PREVIEW_PATH/"
+          cp -a /tmp/feature-public/. site/preview/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -103,6 +101,6 @@ jobs:
           echo "## Feature Preview" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Branch:** \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Preview:** \`${{ steps.deployment.outputs.page_url }}preview/${{ github.ref_name }}/\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Preview:** \`${{ steps.deployment.outputs.page_url }}preview/\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "The production site is rebuilt from main before the feature overlay is published." >> "$GITHUB_STEP_SUMMARY"
+          echo "This feature uses the shared preview URL. The production site is rebuilt from main before the feature overlay is published." >> "$GITHUB_STEP_SUMMARY"
