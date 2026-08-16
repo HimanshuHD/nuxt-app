@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CurrentWeather } from '~/shared/types/weather'
+import WeatherVisual from '~/components/weather/WeatherVisual.vue'
 
 type LocationResult = {
   name: string
@@ -171,63 +172,25 @@ function formatTemperature(value: number) {
           <h1>Weather Dashboard</h1>
           <p class="intro">Check current weather using your location, a city search, or coordinates.</p>
         </div>
-        <button class="button button--primary" type="button" :disabled="loading" @click="useCurrentLocation">
-          {{ loading ? 'Loading…' : 'Use my location' }}
-        </button>
+        <button class="button button--primary" type="button" :disabled="loading" @click="useCurrentLocation">{{ loading ? 'Loading…' : 'Use my location' }}</button>
       </header>
 
       <section class="location-panel" aria-labelledby="location-heading">
-        <div>
-          <p class="section-label" id="location-heading">Find a location</p>
-          <p class="section-help">Start typing to search. Choose a location from the results.</p>
-        </div>
+        <div><p class="section-label" id="location-heading">Find a location</p><p class="section-help">Start typing to search. Choose a location from the results.</p></div>
         <div class="search-field-wrap">
-          <label class="search-field">
-            <span>City or location</span>
-            <div class="search-input-wrap">
-              <input v-model="searchQuery" type="search" autocomplete="off" placeholder="e.g. Delhi, London, Tokyo" role="combobox" :aria-expanded="searchResults.length > 0" aria-controls="location-results" :aria-activedescendant="activeResultIndex >= 0 ? `location-result-${activeResultIndex}` : undefined" @input="scheduleLocationSearch" @keydown="handleSearchKeydown" />
-              <span v-if="searchLoading" class="search-loader" aria-label="Searching" role="status" />
-            </div>
-          </label>
-          <div v-if="searchResults.length" id="location-results" class="search-results" role="listbox" aria-label="Location search results">
-            <button v-for="(location, index) in searchResults" :id="`location-result-${index}`" :key="`${location.latitude}-${location.longitude}`" class="search-result" :class="{ 'search-result--active': index === activeResultIndex }" type="button" role="option" :aria-selected="index === activeResultIndex" @mousedown.prevent="selectLocation(location)">
-              <strong>{{ location.name }}</strong><span>{{ [location.state, location.country].filter(Boolean).join(', ') }}</span>
-            </button>
-          </div>
+          <label class="search-field"><span>City or location</span><div class="search-input-wrap"><input v-model="searchQuery" type="search" autocomplete="off" placeholder="e.g. Delhi, London, Tokyo" role="combobox" :aria-expanded="searchResults.length > 0" aria-controls="location-results" :aria-activedescendant="activeResultIndex >= 0 ? `location-result-${activeResultIndex}` : undefined" @input="scheduleLocationSearch" @keydown="handleSearchKeydown" /><span v-if="searchLoading" class="search-loader" aria-label="Searching" role="status" /></div></label>
+          <div v-if="searchResults.length" id="location-results" class="search-results" role="listbox" aria-label="Location search results"><button v-for="(location, index) in searchResults" :id="`location-result-${index}`" :key="`${location.latitude}-${location.longitude}`" class="search-result" :class="{ 'search-result--active': index === activeResultIndex }" type="button" role="option" :aria-selected="index === activeResultIndex" @mousedown.prevent="selectLocation(location)"><strong>{{ location.name }}</strong><span>{{ [location.state, location.country].filter(Boolean).join(', ') }}</span></button></div>
           <p v-if="searchError" class="search-error" role="alert">{{ searchError }}</p>
         </div>
       </section>
 
-      <details class="advanced-search">
-        <summary>Advanced search</summary>
-        <div class="advanced-search__content">
-          <div><p class="section-label">Test coordinates</p><p class="section-help">Use coordinates directly while validating the weather API.</p></div>
-          <form class="coordinate-form" @submit.prevent="submitCoordinates">
-            <label>Latitude <input v-model="latitude" type="number" step="any" min="-90" max="90" inputmode="decimal" /></label>
-            <label>Longitude <input v-model="longitude" type="number" step="any" min="-180" max="180" inputmode="decimal" /></label>
-            <button class="button button--secondary" type="submit" :disabled="loading">Get weather</button>
-          </form>
-        </div>
-      </details>
+      <details class="advanced-search"><summary>Advanced search</summary><div class="advanced-search__content"><div><p class="section-label">Test coordinates</p><p class="section-help">Use coordinates directly while validating the weather API.</p></div><form class="coordinate-form" @submit.prevent="submitCoordinates"><label>Latitude <input v-model="latitude" type="number" step="any" min="-90" max="90" inputmode="decimal" /></label><label>Longitude <input v-model="longitude" type="number" step="any" min="-180" max="180" inputmode="decimal" /></label><button class="button button--secondary" type="submit" :disabled="loading">Get weather</button></form></div></details>
 
       <section class="weather-card weather-card--stable" aria-live="polite" :aria-busy="loading">
-        <template v-if="loading">
-          <div class="skeleton-header"><div class="skeleton skeleton--eyebrow" /><div class="skeleton skeleton--title" /><div class="skeleton skeleton--condition" /></div>
-          <div class="skeleton-temperature"><div class="skeleton skeleton--icon" /><div class="skeleton skeleton--temp" /></div>
-          <div class="weather-summary"><div v-for="index in 8" :key="index" class="skeleton-tile"><div class="skeleton skeleton--label" /><div class="skeleton skeleton--value" /></div></div>
-        </template>
+        <template v-if="loading"><div class="skeleton-header"><div class="skeleton skeleton--eyebrow" /><div class="skeleton skeleton--title" /><div class="skeleton skeleton--condition" /></div><div class="skeleton-temperature"><div class="skeleton skeleton--icon" /><div class="skeleton skeleton--temp" /></div><div class="weather-summary"><div v-for="index in 8" :key="index" class="skeleton-tile"><div class="skeleton skeleton--label" /><div class="skeleton skeleton--value" /></div></div></template>
         <template v-else-if="weather">
-          <div class="weather-main">
-            <div class="weather-location">
-              <p class="eyebrow">Current weather</p>
-              <div class="location-title"><img class="country-flag" :src="countryFlagUrl(weather.location.country)" :alt="`${weather.location.country} flag`" width="40" height="27" loading="lazy" /><h2>{{ weather.location.name }}, {{ weather.location.country }}</h2></div>
-              <p class="condition">{{ weather.description }}</p>
-            </div>
-            <div class="weather-visual-wrap"><WeatherVisual :condition="weather.description" :icon="weather.icon" /><div class="temperature"><img :src="weatherIconUrl(weather.icon)" :alt="weather.description" /><strong>{{ formatTemperature(weather.temperature) }}</strong></div></div>
-          </div>
-          <div class="weather-summary">
-            <div><span>Feels like</span><strong>{{ formatTemperature(weather.feelsLike) }}</strong></div><div><span>Humidity</span><strong>{{ weather.humidity }}%</strong></div><div><span>Wind</span><strong>{{ weather.windSpeed }} m/s</strong></div><div><span>Pressure</span><strong>{{ weather.pressure }} hPa</strong></div><div><span>Visibility</span><strong>{{ (weather.visibility / 1000).toFixed(1) }} km</strong></div><div><span>Cloudiness</span><strong>{{ weather.cloudiness }}%</strong></div><div><span>Sunrise</span><strong>{{ weather.sunrise }}</strong></div><div><span>Sunset</span><strong>{{ weather.sunset }}</strong></div>
-          </div>
+          <div class="weather-main"><div class="weather-location"><p class="eyebrow">Current weather</p><div class="location-title"><img class="country-flag" :src="countryFlagUrl(weather.location.country)" :alt="`${weather.location.country} flag`" width="40" height="27" loading="lazy" /><h2>{{ weather.location.name }}, {{ weather.location.country }}</h2></div><p class="condition">{{ weather.description }}</p></div><div class="weather-visual-wrap"><WeatherVisual :condition="weather.description" :icon="weather.icon" /><div class="temperature"><img :src="weatherIconUrl(weather.icon)" :alt="weather.description" /><strong>{{ formatTemperature(weather.temperature) }}</strong></div></div></div>
+          <div class="weather-summary"><div><span>Feels like</span><strong>{{ formatTemperature(weather.feelsLike) }}</strong></div><div><span>Humidity</span><strong>{{ weather.humidity }}%</strong></div><div><span>Wind</span><strong>{{ weather.windSpeed }} m/s</strong></div><div><span>Pressure</span><strong>{{ weather.pressure }} hPa</strong></div><div><span>Visibility</span><strong>{{ (weather.visibility / 1000).toFixed(1) }} km</strong></div><div><span>Cloudiness</span><strong>{{ weather.cloudiness }}%</strong></div><div><span>Sunrise</span><strong>{{ weather.sunrise }}</strong></div><div><span>Sunset</span><strong>{{ weather.sunset }}</strong></div></div>
           <p class="weather-meta">Coordinates: {{ weather.location.latitude.toFixed(4) }}, {{ weather.location.longitude.toFixed(4) }}</p>
         </template>
         <div v-else class="weather-empty"><p class="eyebrow">Current weather</p><h2>Choose a location to get started</h2><p>Search for a city, use your location, or enter coordinates.</p></div>
