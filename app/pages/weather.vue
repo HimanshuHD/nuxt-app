@@ -27,7 +27,6 @@ let searchRequestId = 0
 async function fetchWeather(lat = Number(latitude.value), lon = Number(longitude.value)) {
   errorMessage.value = ''
   loading.value = true
-
   try {
     weather.value = await $fetch<CurrentWeather>('/api/weather', { query: { lat, lon } })
     toast.success('Weather data updated successfully.')
@@ -45,12 +44,10 @@ function scheduleLocationSearch() {
   searchError.value = ''
   searchResults.value = []
   activeResultIndex.value = -1
-
   if (query.length < 2) {
     searchLoading.value = false
     return
   }
-
   searchLoading.value = true
   const requestId = ++searchRequestId
   searchTimer = setTimeout(async () => {
@@ -183,20 +180,22 @@ function formatTemperature(value: number) {
         <div class="search-field-wrap">
           <label class="search-field">
             <span>City or location</span>
-            <input
-              v-model="searchQuery"
-              type="search"
-              autocomplete="off"
-              placeholder="e.g. Delhi, London, Tokyo"
-              role="combobox"
-              :aria-expanded="searchResults.length > 0"
-              aria-controls="location-results"
-              :aria-activedescendant="activeResultIndex >= 0 ? `location-result-${activeResultIndex}` : undefined"
-              @input="scheduleLocationSearch"
-              @keydown="handleSearchKeydown"
-            />
+            <div class="search-input-wrap">
+              <input
+                v-model="searchQuery"
+                type="search"
+                autocomplete="off"
+                placeholder="e.g. Delhi, London, Tokyo"
+                role="combobox"
+                :aria-expanded="searchResults.length > 0"
+                aria-controls="location-results"
+                :aria-activedescendant="activeResultIndex >= 0 ? `location-result-${activeResultIndex}` : undefined"
+                @input="scheduleLocationSearch"
+                @keydown="handleSearchKeydown"
+              />
+              <span v-if="searchLoading" class="search-loader" aria-label="Searching" role="status" />
+            </div>
           </label>
-          <div v-if="searchLoading" class="search-status" aria-live="polite">Searching…</div>
           <div v-if="searchResults.length" id="location-results" class="search-results" role="listbox" aria-label="Location search results">
             <button
               v-for="(location, index) in searchResults"
@@ -217,37 +216,30 @@ function formatTemperature(value: number) {
         </div>
       </section>
 
-      <section class="location-panel" aria-labelledby="coordinates-heading">
-        <div>
-          <p class="section-label" id="coordinates-heading">Test coordinates</p>
-          <p class="section-help">Use coordinates directly while validating the weather API.</p>
+      <details class="advanced-search">
+        <summary>Advanced search</summary>
+        <div class="advanced-search__content">
+          <div>
+            <p class="section-label">Test coordinates</p>
+            <p class="section-help">Use coordinates directly while validating the weather API.</p>
+          </div>
+          <form class="coordinate-form" @submit.prevent="submitCoordinates">
+            <label>Latitude <input v-model="latitude" type="number" step="any" min="-90" max="90" inputmode="decimal" /></label>
+            <label>Longitude <input v-model="longitude" type="number" step="any" min="-180" max="180" inputmode="decimal" /></label>
+            <button class="button button--secondary" type="submit" :disabled="loading">Get weather</button>
+          </form>
         </div>
-        <form class="coordinate-form" @submit.prevent="submitCoordinates">
-          <label>Latitude <input v-model="latitude" type="number" step="any" min="-90" max="90" inputmode="decimal" /></label>
-          <label>Longitude <input v-model="longitude" type="number" step="any" min="-180" max="180" inputmode="decimal" /></label>
-          <button class="button button--secondary" type="submit" :disabled="loading">Get weather</button>
-        </form>
-      </section>
+      </details>
 
       <section class="weather-card weather-card--stable" aria-live="polite" :aria-busy="loading">
         <template v-if="loading">
-          <div class="skeleton-header">
-            <div class="skeleton skeleton--eyebrow" />
-            <div class="skeleton skeleton--title" />
-            <div class="skeleton skeleton--condition" />
-          </div>
+          <div class="skeleton-header"><div class="skeleton skeleton--eyebrow" /><div class="skeleton skeleton--title" /><div class="skeleton skeleton--condition" /></div>
           <div class="skeleton-temperature"><div class="skeleton skeleton--icon" /><div class="skeleton skeleton--temp" /></div>
-          <div class="weather-summary">
-            <div v-for="index in 8" :key="index" class="skeleton-tile"><div class="skeleton skeleton--label" /><div class="skeleton skeleton--value" /></div>
-          </div>
+          <div class="weather-summary"><div v-for="index in 8" :key="index" class="skeleton-tile"><div class="skeleton skeleton--label" /><div class="skeleton skeleton--value" /></div></div>
         </template>
         <template v-else-if="weather">
           <div class="weather-main">
-            <div>
-              <p class="eyebrow">Current weather</p>
-              <h2>{{ weather.location.name }}, {{ weather.location.country }}</h2>
-              <p class="condition">{{ weather.description }}</p>
-            </div>
+            <div><p class="eyebrow">Current weather</p><h2>{{ weather.location.name }}, {{ weather.location.country }}</h2><p class="condition">{{ weather.description }}</p></div>
             <div class="temperature"><img :src="weatherIconUrl(weather.icon)" :alt="weather.description" /><strong>{{ formatTemperature(weather.temperature) }}</strong></div>
           </div>
           <div class="weather-summary">
@@ -262,11 +254,7 @@ function formatTemperature(value: number) {
           </div>
           <p class="weather-meta">Coordinates: {{ weather.location.latitude.toFixed(4) }}, {{ weather.location.longitude.toFixed(4) }}</p>
         </template>
-        <div v-else class="weather-empty">
-          <p class="eyebrow">Current weather</p>
-          <h2>Choose a location to get started</h2>
-          <p>Search for a city, use your location, or enter test coordinates.</p>
-        </div>
+        <div v-else class="weather-empty"><p class="eyebrow">Current weather</p><h2>Choose a location to get started</h2><p>Search for a city, use your location, or enter coordinates.</p></div>
       </section>
       <p v-if="errorMessage" class="state state--error" role="alert">{{ errorMessage }}</p>
     </div>
@@ -276,12 +264,17 @@ function formatTemperature(value: number) {
 <style scoped>
 .search-field-wrap { position: relative; }
 .search-field { display: grid; gap: .4rem; color: #cbd5e1; font-size: .8rem; font-weight: 700; }
-.search-field input { width: 100%; min-width: 0; padding: .8rem .9rem; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; background: rgba(0,0,0,.18); color: #f8fafc; font: inherit; }
+.search-input-wrap { position: relative; }
+.search-field input { width: 100%; min-width: 0; padding: .8rem 2.8rem .8rem .9rem; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; background: rgba(0,0,0,.18); color: #f8fafc; font: inherit; }
+.search-loader { position: absolute; top: 50%; right: 2.45rem; width: 15px; height: 15px; transform: translateY(-50%); border: 2px solid rgba(255,255,255,.22); border-top-color: #f8fafc; border-radius: 50%; animation: spin .7s linear infinite; pointer-events: none; }
 .search-results { position: absolute; z-index: 20; top: calc(100% + .45rem); right: 0; left: 0; display: grid; gap: .35rem; max-height: 320px; overflow-y: auto; padding: .4rem; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(15,23,42,.98); box-shadow: 0 20px 50px rgba(0,0,0,.4); }
 .search-result { display: grid; gap: .2rem; width: 100%; padding: .8rem .9rem; border: 0; border-radius: 10px; background: transparent; color: #f8fafc; text-align: left; cursor: pointer; font: inherit; }
 .search-result:hover, .search-result--active { background: rgba(255,255,255,.08); }
-.search-result span, .search-status { color: #94a3b8; font-size: .85rem; }
+.search-result span { color: #94a3b8; font-size: .85rem; }
 .search-error { margin: .45rem 0 0; color: #fecaca; font-size: .85rem; }
+.advanced-search { margin-bottom: 1.25rem; border: 1px solid rgba(255,255,255,.1); border-radius: 14px; background: rgba(255,255,255,.025); }
+.advanced-search summary { padding: .9rem 1rem; color: #cbd5e1; font-weight: 700; cursor: pointer; }
+.advanced-search__content { display: grid; gap: 1rem; padding: 0 1rem 1rem; }
 .weather-card--stable { min-height: 430px; position: relative; }
 .weather-empty { display: grid; min-height: 390px; place-content: center; text-align: center; }
 .weather-empty h2 { margin: 0 0 .5rem; }
@@ -298,10 +291,6 @@ function formatTemperature(value: number) {
 .skeleton--label { width: 60%; height: 12px; margin-bottom: .6rem; }
 .skeleton--value { width: 45%; height: 18px; }
 @keyframes shimmer { to { background-position: -200% 0; } }
-@media (max-width: 640px) {
-  .skeleton-header { top: 1.25rem; left: 1.25rem; width: 55%; }
-  .skeleton-temperature { top: 1rem; right: 1.25rem; }
-  .skeleton--icon { width: 55px; height: 55px; }
-  .skeleton--temp { width: 70px; height: 48px; }
-}
+@keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+@media (max-width: 640px) { .skeleton-header { top: 1.25rem; left: 1.25rem; width: 55%; } .skeleton-temperature { top: 1rem; right: 1.25rem; } .skeleton--icon { width: 55px; height: 55px; } .skeleton--temp { width: 70px; height: 48px; } }
 </style>
