@@ -7,19 +7,20 @@ export type Toast = {
   timeout: number
 }
 
-const toasts = ref<Toast[]>([])
 let nextToastId = 0
 
 export function useToast() {
+  const toasts = useState<Toast[]>('app-toasts', () => [])
+
   function remove(id: number) {
     toasts.value = toasts.value.filter((toast) => toast.id !== id)
   }
 
   function show(message: string, type: ToastType, timeout = 4000) {
     const id = ++nextToastId
-    toasts.value.push({ id, type, message, timeout })
+    toasts.value = [...toasts.value, { id, type, message, timeout }]
 
-    if (timeout > 0) {
+    if (timeout > 0 && import.meta.client) {
       window.setTimeout(() => remove(id), timeout)
     }
   }
