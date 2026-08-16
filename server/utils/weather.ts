@@ -1,4 +1,4 @@
-import type { CurrentWeather } from '~/shared/types/weather'
+import type { CurrentWeather } from '../../shared/types/weather'
 
 interface OpenWeatherResponse {
   coord: { lon: number; lat: number }
