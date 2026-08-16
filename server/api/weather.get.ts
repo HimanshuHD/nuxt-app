@@ -76,5 +76,5 @@ function isFetchError(error: unknown): boolean {
     return false
   }
 
-  return 'request' in error || 'response' in error || 'statusCode' in error
+  return 'request' in error || 'response' in error
 }
