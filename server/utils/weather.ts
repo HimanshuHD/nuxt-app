@@ -1,6 +1,7 @@
+import { createError } from 'h3'
 import type { CurrentWeather } from '../../shared/types/weather'
 
-interface OpenWeatherResponse {
+export interface OpenWeatherResponse {
   coord: { lon: number; lat: number }
   weather: Array<{
     main: string
@@ -41,7 +42,7 @@ export function parseCoordinate(value: unknown, name: string): number {
     })
   }
 
-  const limits = name === 'lat' ? [-90, 90] : [-180, 180]
+  const limits: [number, number] = name === 'lat' ? [-90, 90] : [-180, 180]
   if (parsed < limits[0] || parsed > limits[1]) {
     throw createError({
       statusCode: 400,

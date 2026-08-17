@@ -1,10 +1,11 @@
-import { normalizeWeather, parseCoordinate } from '../utils/weather'
+import { createError } from 'h3'
+import { normalizeWeather, parseCoordinate, type OpenWeatherResponse } from '../utils/weather'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const lat = parseCoordinate(query.lat, 'lat')
   const lon = parseCoordinate(query.lon, 'lon')
-  const config = useRuntimeConfig(event)
+  const config = useRuntimeConfig()
 
   if (!config.openWeatherApiKey) {
     throw createError({
@@ -17,7 +18,7 @@ export default defineEventHandler(async (event) => {
   const url = `${baseUrl.replace(/\/$/, '')}/data/2.5/weather`
 
   try {
-    const response = await $fetch(url, {
+    const response = await $fetch<OpenWeatherResponse>(url, {
       query: {
         lat,
         lon,

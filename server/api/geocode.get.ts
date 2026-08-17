@@ -10,7 +10,7 @@ interface GeocodingResult {
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const search = typeof query.q === 'string' ? query.q.trim() : ''
-  const config = useRuntimeConfig(event)
+  const config = useRuntimeConfig()
 
   if (!search) {
     throw createError({
