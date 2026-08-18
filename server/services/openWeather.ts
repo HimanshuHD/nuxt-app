@@ -2,7 +2,7 @@ import type { CurrentWeather } from '../../shared/types/weather'
 import {
   normalizeWeather,
   type OpenWeatherResponse,
-} from '../utils/weather'
+} from '../utils/weather-normalizer'
 
 export interface GeocodingResult {
   name: string
