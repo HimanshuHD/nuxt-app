@@ -1,4 +1,4 @@
-import type { CurrentWeather, WeatherLocation } from '~/types/weather'
+import type { CurrentWeather, WeatherLocation } from '../../shared/types/weather'
 
 export interface LocationSearchResult extends WeatherLocation {}
 
