@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { CurrentWeather } from '../../shared/types/weather'
 import type { LocationSearchResult } from '~/components/weather/LocationSearch.vue'
+import CoordinateSearch from '~/components/weather/CoordinateSearch.vue'
+import LocationSearch from '~/components/weather/LocationSearch.vue'
+import WeatherCard from '~/components/weather/WeatherCard.vue'
 
 const weather = ref<CurrentWeather | null>(null)
 const loading = ref(false)
@@ -110,30 +113,60 @@ onMounted(() => {
   <main class="page weather-page">
     <div class="content weather-content">
       <NuxtLink class="back" to="/">← Back to home</NuxtLink>
+
       <header class="weather-header">
         <div>
           <p class="eyebrow">Nuxt · OpenWeatherMap</p>
           <h1>Weather Dashboard</h1>
           <p class="intro">Check current weather using your location, a city search, or coordinates.</p>
         </div>
-        <button class="button button--primary" type="button" :disabled="loading" @click="useCurrentLocation">{{ loading ? 'Loading…' : 'Use my location' }}</button>
+        <button class="button button--primary" type="button" :disabled="loading" @click="useCurrentLocation">
+          {{ loading ? 'Loading…' : 'Use my location' }}
+        </button>
       </header>
+
       <section class="location-panel" aria-labelledby="location-heading">
         <div>
           <p id="location-heading" class="section-label">Find a location</p>
           <p class="section-help">Start typing to search. Choose a location from the results.</p>
         </div>
-        <LocationSearch v-model="searchQuery" :results="searchResults" :loading="searchLoading" :error="searchError" @search="locationSearch.search" @select="selectLocation" @clear="locationSearch.clear" />
+        <LocationSearch
+          v-model="searchQuery"
+          :results="searchResults"
+          :loading="searchLoading"
+          :error="searchError"
+          @search="locationSearch.search"
+          @select="selectLocation"
+          @clear="locationSearch.clear"
+        />
       </section>
-      <CoordinateSearch :latitude="latitude" :longitude="longitude" :loading="loading" @update:latitude="latitude = $event" @update:longitude="longitude = $event" @submit="submitCoordinates" />
+
+      <CoordinateSearch
+        :latitude="latitude"
+        :longitude="longitude"
+        :loading="loading"
+        @update:latitude="latitude = $event"
+        @update:longitude="longitude = $event"
+        @submit="submitCoordinates"
+      />
+
       <WeatherCard :weather="weather" :loading="loading" />
-      <p v-if="hasRestoredLocation && !loading && !errorMessage" class="weather-meta weather-restore-note">Showing your last selected location.</p>
+
+      <p v-if="hasRestoredLocation && !loading && !errorMessage" class="weather-meta weather-restore-note">
+        Showing your last selected location.
+      </p>
       <p v-if="errorMessage" class="state state--error" role="alert">{{ errorMessage }}</p>
     </div>
   </main>
 </template>
 
 <style scoped>
-.location-panel { position: relative; z-index: 30; }
-.weather-restore-note { text-align: center; }
+.location-panel {
+  position: relative;
+  z-index: 30;
+}
+
+.weather-restore-note {
+  text-align: center;
+}
 </style>
