@@ -2,7 +2,10 @@ import { createError } from 'h3'
 import type { CurrentWeather } from '../../shared/types/weather'
 
 export interface OpenWeatherResponse {
-  coord: { lon: number; lat: number }
+  coord: {
+    lon: number
+    lat: number
+  }
   weather: Array<{
     main: string
     description: string
@@ -31,30 +34,10 @@ export interface OpenWeatherResponse {
   timezone: number
 }
 
-export function parseCoordinate(value: unknown, name: string): number {
-  const raw = Array.isArray(value) ? value[0] : value
-  const parsed = Number(raw)
-
-  if (!Number.isFinite(parsed)) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${name} must be a valid number`,
-    })
-  }
-
-  const limits: [number, number] = name === 'lat' ? [-90, 90] : [-180, 180]
-  if (parsed < limits[0] || parsed > limits[1]) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${name} is outside the valid range`,
-    })
-  }
-
-  return parsed
-}
-
 function formatUnixTime(timestamp: number, timezoneOffset: number): string {
-  return new Date((timestamp + timezoneOffset) * 1000).toISOString().slice(11, 16)
+  return new Date((timestamp + timezoneOffset) * 1000)
+    .toISOString()
+    .slice(11, 16)
 }
 
 export function normalizeWeather(data: OpenWeatherResponse): CurrentWeather {

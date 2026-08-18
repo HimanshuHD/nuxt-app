@@ -1,3 +1,4 @@
+import { createError } from 'h3'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const query = { lat: '28.6139', lon: '77.2090' }
@@ -11,6 +12,7 @@ vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
 vi.stubGlobal('getQuery', () => query)
 vi.stubGlobal('useRuntimeConfig', () => config)
 vi.stubGlobal('$fetch', fetchMock)
+vi.stubGlobal('createError', createError)
 
 type WeatherHandler = (event: unknown) => Promise<unknown>
 let weatherHandler: WeatherHandler
@@ -23,19 +25,26 @@ function getErrorDetails(error: unknown): { statusCode?: number; statusMessage?:
   const value = error as {
     statusCode?: number | { statusCode?: number; statusMessage?: string }
     statusMessage?: string
+    message?: string
   }
 
-  if (typeof value.statusCode === 'object') {
+  // Handle nested statusCode
+  if (typeof value.statusCode === 'object' && value.statusCode) {
     return {
       statusCode: value.statusCode.statusCode,
       statusMessage: value.statusCode.statusMessage,
     }
   }
 
-  return {
-    statusCode: value.statusCode,
-    statusMessage: value.statusMessage,
+  // Handle direct properties
+  if (typeof value.statusCode === 'number' && typeof value.statusMessage === 'string') {
+    return {
+      statusCode: value.statusCode,
+      statusMessage: value.statusMessage,
+    }
   }
+
+  return {}
 }
 
 async function expectError(promise: Promise<unknown>, statusCode: number, statusMessage: string) {
@@ -62,27 +71,27 @@ beforeAll(async () => {
 
 describe('weather utilities', () => {
   it('accepts valid latitude and longitude values', async () => {
-    const { parseCoordinate } = await import('./weather')
+    const { parseCoordinate } = await import('./coordinates')
 
     expect(parseCoordinate('28.6139', 'lat')).toBe(28.6139)
     expect(parseCoordinate('77.2090', 'lon')).toBe(77.209)
   })
 
   it('rejects non-numeric coordinates', async () => {
-    const { parseCoordinate } = await import('./weather')
+    const { parseCoordinate } = await import('./coordinates')
 
     expectThrownError(() => parseCoordinate('abc', 'lat'), 'lat must be a valid number')
   })
 
   it('rejects coordinates outside their valid ranges', async () => {
-    const { parseCoordinate } = await import('./weather')
+    const { parseCoordinate } = await import('./coordinates')
 
     expectThrownError(() => parseCoordinate(91, 'lat'), 'lat is outside the valid range')
     expectThrownError(() => parseCoordinate(-181, 'lon'), 'lon is outside the valid range')
   })
 
   it('normalizes the OpenWeather response into the frontend contract', async () => {
-    const { normalizeWeather } = await import('./weather')
+    const { normalizeWeather } = await import('./weather-normalizer')
     const result = normalizeWeather({
       coord: { lon: 77.209, lat: 28.6139 },
       weather: [{ main: 'Clouds', description: 'broken clouds', icon: '04d' }],
@@ -112,7 +121,7 @@ describe('weather utilities', () => {
   })
 
   it('rejects an upstream response without a weather condition', async () => {
-    const { normalizeWeather } = await import('./weather')
+    const { normalizeWeather } = await import('./weather-normalizer')
 
     expectThrownError(() => normalizeWeather({
       coord: { lon: 77.209, lat: 28.6139 },

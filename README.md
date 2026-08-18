@@ -31,6 +31,46 @@ npm test
 npm run generate
 ```
 
+## Architecture
+
+The application uses a feature-oriented structure with separate responsibilities for pages, components, composables, client services, server API routes, and server integrations.
+
+```text
+app/
+├── components/
+│   ├── ui/
+│   └── weather/
+├── composables/
+├── pages/
+├── services/
+├── types/
+├── utils/
+└── assets/
+
+server/
+├── api/
+├── services/
+└── utils/
+
+shared/
+└── types/
+```
+
+See [`docs/architecture.md`](docs/architecture.md) for the ownership and state-management conventions.
+
+## Environment configuration
+
+OpenWeatherMap configuration is kept in Nuxt private runtime configuration. Do not commit `.env` files or API keys.
+
+Expected environment variables:
+
+```text
+NUXT_OPEN_WEATHER_API_KEY
+NUXT_OPEN_WEATHER_BASE_URL
+```
+
+For GitHub Codespaces and GitHub Actions, configure these values as environment secrets rather than storing them in the repository.
+
 ## Deployment
 
 The `main` branch is the production branch.
