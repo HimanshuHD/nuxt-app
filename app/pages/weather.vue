@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CurrentWeather } from '../../shared/types/weather'
-import type { LocationSearchResult } from '~/components/weather/LocationSearch.vue'
+import type { LocationSearchResult } from '../../shared/types/location'
 import CoordinateSearch from '~/components/weather/CoordinateSearch.vue'
 import LocationSearch from '~/components/weather/LocationSearch.vue'
 import WeatherCard from '~/components/weather/WeatherCard.vue'
