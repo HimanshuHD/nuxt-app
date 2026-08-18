@@ -41,23 +41,153 @@ const type = computed(() => {
 </template>
 
 <style scoped>
-.weather-visual { width: min(250px, 42vw); min-width: 180px; filter: drop-shadow(0 18px 28px rgba(0,0,0,.22)); }
-.weather-visual svg { display: block; width: 100%; height: auto; overflow: visible; }
-.visual-cloud { fill: rgba(232,245,255,.92); }
-.visual-sun circle, .visual-sun-small { fill: #ffd86b; }
-.visual-rays path { fill: none; stroke: #ffd86b; stroke-width: 5; stroke-linecap: round; animation: pulse 2.4s ease-in-out infinite; }
-.visual-sun { transform-origin: 110px 65px; animation: float 4s ease-in-out infinite; }
-.visual-clouds .visual-cloud, .visual-rain .visual-cloud, .visual-snow .visual-cloud, .visual-storm .visual-cloud { animation: float 4s ease-in-out infinite; }
-.rain-drops path { fill: none; stroke: #7dd3fc; stroke-width: 6; stroke-linecap: round; animation: rain 1s linear infinite; }
-.rain-drops path:nth-child(2) { animation-delay: .18s; }.rain-drops path:nth-child(3) { animation-delay: .36s; }
-.snowflakes circle { fill: #e0f2fe; animation: snow 2s ease-in-out infinite; }.snowflakes circle:nth-child(2) { animation-delay: .35s; }.snowflakes circle:nth-child(3) { animation-delay: .7s; }
-.visual-bolt { fill: #facc15; animation: flash 2.8s infinite; }
-.visual-mist path { fill: none; stroke: #cbd5e1; stroke-width: 6; stroke-linecap: round; opacity: .65; animation: drift 3s ease-in-out infinite; }.visual-mist path:nth-child(2){animation-delay:.3s}.visual-mist path:nth-child(3){animation-delay:.6s}
-@keyframes float { 50% { transform: translateY(-7px); } }
-@keyframes pulse { 50% { opacity: .45; } }
-@keyframes rain { from { transform: translateY(-7px); opacity: 0; } 30% { opacity: 1; } to { transform: translateY(12px); opacity: 0; } }
-@keyframes snow { 50% { transform: translateY(8px); opacity: .55; } }
-@keyframes flash { 0%, 48%, 52%, 100% { opacity: .85; } 50% { opacity: .1; } }
-@keyframes drift { 50% { transform: translateX(10px); } }
-@media (prefers-reduced-motion: reduce) { .weather-visual * { animation: none !important; } }
+.weather-visual {
+  width: min(250px, 42vw);
+  min-width: 180px;
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.22));
+}
+
+.weather-visual svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.visual-cloud {
+  fill: rgba(232, 245, 255, 0.92);
+}
+
+.visual-sun circle,
+.visual-sun-small {
+  fill: #ffd86b;
+}
+
+.visual-rays path {
+  fill: none;
+  stroke: #ffd86b;
+  stroke-width: 5;
+  stroke-linecap: round;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+.visual-sun {
+  transform-origin: 110px 65px;
+  animation: float 4s ease-in-out infinite;
+}
+
+.visual-clouds .visual-cloud,
+.visual-rain .visual-cloud,
+.visual-snow .visual-cloud,
+.visual-storm .visual-cloud {
+  animation: float 4s ease-in-out infinite;
+}
+
+.rain-drops path {
+  fill: none;
+  stroke: #7dd3fc;
+  stroke-width: 6;
+  stroke-linecap: round;
+  animation: rain 1s linear infinite;
+}
+
+.rain-drops path:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.rain-drops path:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+.snowflakes circle {
+  fill: #e0f2fe;
+  animation: snow 2s ease-in-out infinite;
+}
+
+.snowflakes circle:nth-child(2) {
+  animation-delay: 0.35s;
+}
+
+.snowflakes circle:nth-child(3) {
+  animation-delay: 0.7s;
+}
+
+.visual-bolt {
+  fill: #facc15;
+  animation: flash 2.8s infinite;
+}
+
+.visual-mist path {
+  fill: none;
+  stroke: #cbd5e1;
+  stroke-width: 6;
+  stroke-linecap: round;
+  opacity: 0.65;
+  animation: drift 3s ease-in-out infinite;
+}
+
+.visual-mist path:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.visual-mist path:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes rain {
+  from {
+    transform: translateY(-7px);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+
+@keyframes snow {
+  50% {
+    transform: translateY(8px);
+    opacity: 0.55;
+  }
+}
+
+@keyframes flash {
+  0%,
+  48%,
+  52%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0.1;
+  }
+}
+
+@keyframes drift {
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-visual * {
+    animation: none !important;
+  }
+}
 </style>
