@@ -1,4 +1,4 @@
-import type { LocationSearchResult } from '~/services/weather'
+import type { LocationSearchResult } from '../../shared/types/location'
 import { searchLocations } from '~/services/weather'
 
 export function useLocationSearch() {
