@@ -36,9 +36,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
       - name: Install feature dependencies
-        run: npm install
+        run: npm ci
 
       - name: Prepare feature Nuxt
         run: npx nuxt prepare
@@ -58,7 +59,7 @@ jobs:
 
       - name: Install production dependencies
         working-directory: ../production
-        run: npm install
+        run: npm ci
 
       - name: Prepare production Nuxt
         working-directory: ../production
