@@ -1,5 +1,5 @@
 import { fetchCurrentWeather } from '../services/openWeather'
-import { parseCoordinate } from '../utils/weather'
+import { parseCoordinate } from '../utils/coordinates'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
