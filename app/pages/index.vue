@@ -15,8 +15,11 @@
         >
           Explore Nuxt
         </a>
-        <NuxtLink class="button button--primary" to="/sample">
+        <NuxtLink class="button button--secondary" to="/sample">
           View Sample API Page
+        </NuxtLink>
+        <NuxtLink class="button button--primary" to="/weather">
+          Weather Dashboard
         </NuxtLink>
       </div>
     </section>
