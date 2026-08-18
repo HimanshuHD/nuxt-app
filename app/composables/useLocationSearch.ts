@@ -13,30 +13,73 @@ export function useLocationSearch() {
     const query = searchQuery.value.trim()
     searchError.value = ''
     searchResults.value = []
-    if (query.length < 2) { searchLoading.value = false; return }
+    if (query.length < 2) {
+      searchLoading.value = false
+      return
+    }
     searchLoading.value = true
     const currentRequestId = ++requestId.value
     timer = setTimeout(async () => {
       try {
-        const results = await $fetch<LocationSearchResult[]>('/api/geocode', { query: { q: query } })
+        const results = await $fetch<LocationSearchResult[]>('/api/geocode', {
+          query: { q: query },
+        })
         if (currentRequestId !== requestId.value || query !== searchQuery.value.trim()) return
         searchResults.value = results
-        if (!results.length) searchError.value = 'No matching locations found. Try a city or country name.'
+        if (!results.length) {
+          searchError.value = 'No matching locations found. Try a city or country name.'
+        }
       } catch (error: unknown) {
         if (currentRequestId !== requestId.value) return
         searchError.value = getSearchErrorMessage(error)
-      } finally { if (currentRequestId === requestId.value) searchLoading.value = false }
+      } finally {
+        if (currentRequestId === requestId.value) searchLoading.value = false
+      }
     }, 300)
   }
-  function clearResults() { if (timer) clearTimeout(timer); requestId.value += 1; searchResults.value = []; searchError.value = ''; searchLoading.value = false }
-  function clear() { clearResults(); searchQuery.value = '' }
-  function setQuery(value: string) { searchQuery.value = value }
-  function setQueryFromLocation(location: LocationSearchResult) { setQuery([location.name, location.state, location.country].filter(Boolean).join(', ')) }
-  onUnmounted(() => { if (timer) clearTimeout(timer) })
-  return { searchQuery, searchResults: readonly(searchResults), searchLoading: readonly(searchLoading), searchError: readonly(searchError), search, clear, clearResults, setQuery, setQueryFromLocation }
+
+  function clearResults() {
+    if (timer) clearTimeout(timer)
+    requestId.value += 1
+    searchResults.value = []
+    searchError.value = ''
+    searchLoading.value = false
+  }
+
+  function clear() {
+    clearResults()
+    searchQuery.value = ''
+  }
+
+  function setQuery(value: string) {
+    searchQuery.value = value
+  }
+
+  function setQueryFromLocation(location: LocationSearchResult) {
+    setQuery([location.name, location.state, location.country].filter(Boolean).join(', '))
+  }
+
+  onUnmounted(() => {
+    if (timer) clearTimeout(timer)
+  })
+
+  return {
+    searchQuery,
+    searchResults,
+    searchLoading,
+    searchError,
+    search,
+    clear,
+    clearResults,
+    setQuery,
+    setQueryFromLocation,
+  }
 }
 
 function getSearchErrorMessage(error: unknown) {
-  if (error && typeof error === 'object' && 'statusMessage' in error) { const statusMessage = error.statusMessage; if (typeof statusMessage === 'string') return statusMessage }
+  if (error && typeof error === 'object' && 'statusMessage' in error) {
+    const statusMessage = error.statusMessage
+    if (typeof statusMessage === 'string') return statusMessage
+  }
   return 'Unable to search for locations. Please try again.'
 }
