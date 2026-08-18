@@ -4,6 +4,7 @@ import type { LocationSearchResult } from '../../shared/types/location'
 import CoordinateSearch from '~/components/weather/CoordinateSearch.vue'
 import LocationSearch from '~/components/weather/LocationSearch.vue'
 import WeatherCard from '~/components/weather/WeatherCard.vue'
+import { getCurrentWeather } from '~/services/weather'
 
 const weather = ref<CurrentWeather | null>(null)
 const loading = ref(false)
@@ -25,9 +26,7 @@ async function fetchWeather(
   loading.value = true
 
   try {
-    const result = await $fetch<CurrentWeather>('/api/weather', {
-      query: { lat, lon },
-    })
+    const result = await getCurrentWeather(lat, lon)
 
     weather.value = result
     latitude.value = result.location.latitude.toFixed(4)
