@@ -1,4 +1,5 @@
-import type { LocationSearchResult } from '~/components/weather/LocationSearch.vue'
+import type { LocationSearchResult } from '~/services/weather'
+import { searchLocations } from '~/services/weather'
 
 export function useLocationSearch() {
   const searchQuery = ref('')
@@ -10,30 +11,43 @@ export function useLocationSearch() {
 
   async function search() {
     if (timer) clearTimeout(timer)
+
     const query = searchQuery.value.trim()
     searchError.value = ''
     searchResults.value = []
+
     if (query.length < 2) {
       searchLoading.value = false
       return
     }
+
     searchLoading.value = true
     const currentRequestId = ++requestId.value
+
     timer = setTimeout(async () => {
       try {
-        const results = await $fetch<LocationSearchResult[]>('/api/geocode', {
-          query: { q: query },
-        })
-        if (currentRequestId !== requestId.value || query !== searchQuery.value.trim()) return
+        const results = await searchLocations(query)
+
+        if (
+          currentRequestId !== requestId.value ||
+          query !== searchQuery.value.trim()
+        ) {
+          return
+        }
+
         searchResults.value = results
+
         if (!results.length) {
-          searchError.value = 'No matching locations found. Try a city or country name.'
+          searchError.value =
+            'No matching locations found. Try a city or country name.'
         }
       } catch (error: unknown) {
         if (currentRequestId !== requestId.value) return
         searchError.value = getSearchErrorMessage(error)
       } finally {
-        if (currentRequestId === requestId.value) searchLoading.value = false
+        if (currentRequestId === requestId.value) {
+          searchLoading.value = false
+        }
       }
     }, 300)
   }
@@ -56,7 +70,11 @@ export function useLocationSearch() {
   }
 
   function setQueryFromLocation(location: LocationSearchResult) {
-    setQuery([location.name, location.state, location.country].filter(Boolean).join(', '))
+    setQuery(
+      [location.name, location.state, location.country]
+        .filter(Boolean)
+        .join(', '),
+    )
   }
 
   onUnmounted(() => {
@@ -77,9 +95,21 @@ export function useLocationSearch() {
 }
 
 function getSearchErrorMessage(error: unknown) {
-  if (error && typeof error === 'object' && 'statusMessage' in error) {
-    const statusMessage = error.statusMessage
-    if (typeof statusMessage === 'string') return statusMessage
+  if (error && typeof error === 'object') {
+    if ('statusMessage' in error && typeof error.statusMessage === 'string') {
+      return error.statusMessage
+    }
+
+    if (
+      'data' in error &&
+      error.data &&
+      typeof error.data === 'object' &&
+      'statusMessage' in error.data &&
+      typeof error.data.statusMessage === 'string'
+    ) {
+      return error.data.statusMessage
+    }
   }
+
   return 'Unable to search for locations. Please try again.'
 }
