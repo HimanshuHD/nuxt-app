@@ -1,6 +1,5 @@
-import type { CurrentWeather, WeatherLocation } from '../../shared/types/weather'
-
-export interface LocationSearchResult extends WeatherLocation {}
+import type { CurrentWeather } from '../../shared/types/weather'
+import type { LocationSearchResult } from '../../shared/types/location'
 
 export async function getCurrentWeather(
   latitude: number,
