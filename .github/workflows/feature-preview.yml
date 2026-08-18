@@ -57,6 +57,13 @@ jobs:
           git fetch origin main
           git worktree add ../production origin/main
 
+      - name: Use feature lockfile for main preview build
+        working-directory: ../production
+        run: |
+          if [ ! -f package-lock.json ]; then
+            cp "$GITHUB_WORKSPACE/package-lock.json" ./package-lock.json
+          fi
+
       - name: Install production dependencies
         working-directory: ../production
         run: npm ci
