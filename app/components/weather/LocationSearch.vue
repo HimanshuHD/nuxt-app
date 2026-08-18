@@ -1,11 +1,5 @@
 <script setup lang="ts">
-export type LocationSearchResult = {
-  name: string
-  state?: string
-  country: string
-  latitude: number
-  longitude: number
-}
+import type { LocationSearchResult } from '../../../shared/types/location'
 
 const props = withDefaults(
   defineProps<{
