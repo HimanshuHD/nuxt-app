@@ -3,9 +3,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
 
+  // Nuxt automatically maps NUXT_OPEN_WEATHER_API_KEY and
+  // NUXT_OPEN_WEATHER_BASE_URL environment variables to these
+  // private runtime config values. Secrets therefore stay server-side.
   runtimeConfig: {
     openWeatherApiKey: '',
-    openWeatherBaseUrl: 'https://api.openweathermap.org',
+    openWeatherBaseUrl: '',
   },
 
   app: {
