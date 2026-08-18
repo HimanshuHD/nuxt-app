@@ -83,10 +83,16 @@ function submitCoordinates() {
   void fetchWeather(lat, lon)
 }
 
+function retryWeather() {
+  void fetchWeather()
+}
+
 function getWeatherErrorMessage(error: unknown) {
-  if (error && typeof error === 'object' && 'statusMessage' in error) {
-    const statusMessage = error.statusMessage
-    if (typeof statusMessage === 'string') return statusMessage
+  if (error && typeof error === 'object') {
+    if ('statusMessage' in error && typeof error.statusMessage === 'string') return error.statusMessage
+    if ('data' in error && error.data && typeof error.data === 'object' && 'statusMessage' in error.data && typeof error.data.statusMessage === 'string') {
+      return error.data.statusMessage
+    }
   }
   return 'Unable to load weather data. Please try again.'
 }
@@ -120,15 +126,15 @@ onMounted(() => {
           <h1>Weather Dashboard</h1>
           <p class="intro">Check current weather using your location, a city search, or coordinates.</p>
         </div>
-        <button class="button button--primary" type="button" :disabled="loading" @click="useCurrentLocation">
+        <button id="use-location" class="button button--primary" type="button" :disabled="loading" aria-describedby="location-help" @click="useCurrentLocation">
           {{ loading ? 'Loading…' : 'Use my location' }}
         </button>
       </header>
 
-      <section class="location-panel" aria-labelledby="location-heading">
+      <section class="location-panel" aria-labelledby="location-heading" aria-describedby="location-help">
         <div>
           <p id="location-heading" class="section-label">Find a location</p>
-          <p class="section-help">Start typing to search. Choose a location from the results.</p>
+          <p id="location-help" class="section-help">Start typing to search. Choose a location from the results, use your current location, or enter coordinates in Advanced Search.</p>
         </div>
         <LocationSearch
           v-model="searchQuery"
@@ -138,6 +144,7 @@ onMounted(() => {
           @search="locationSearch.search"
           @select="selectLocation"
           @clear="locationSearch.clear"
+          @close="locationSearch.clearResults"
         />
       </section>
 
@@ -152,21 +159,21 @@ onMounted(() => {
 
       <WeatherCard :weather="weather" :loading="loading" />
 
+      <div v-if="errorMessage" class="state state--error weather-error" role="alert" aria-live="assertive">
+        <p>{{ errorMessage }}</p>
+        <button class="button button--secondary" type="button" :disabled="loading" @click="retryWeather">Try again</button>
+      </div>
+
       <p v-if="hasRestoredLocation && !loading && !errorMessage" class="weather-meta weather-restore-note">
         Showing your last selected location.
       </p>
-      <p v-if="errorMessage" class="state state--error" role="alert">{{ errorMessage }}</p>
     </div>
   </main>
 </template>
 
 <style scoped>
-.location-panel {
-  position: relative;
-  z-index: 30;
-}
-
-.weather-restore-note {
-  text-align: center;
-}
+.location-panel { position: relative; z-index: 30; }
+.weather-error { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; text-align: center; }
+.weather-error p { margin: 0; }
+.weather-restore-note { text-align: center; }
 </style>
