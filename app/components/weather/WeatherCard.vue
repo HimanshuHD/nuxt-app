@@ -2,7 +2,10 @@
 import type { CurrentWeather } from '../../../shared/types/weather'
 import WeatherVisual from './WeatherVisual.vue'
 
-const props = defineProps<{ weather: CurrentWeather | null; loading?: boolean }>()
+const props = defineProps<{
+  weather: CurrentWeather | null
+  loading?: boolean
+}>()
 
 function weatherIconUrl(icon: string) {
   return `https://openweathermap.org/img/wn/${icon}@2x.png`
@@ -16,36 +19,46 @@ function formatTemperature(value: number) {
   return `${Math.round(value)}°`
 }
 </script>
+
 <template>
   <section
     class="weather-card weather-card--stable"
     aria-live="polite"
     :aria-busy="props.loading"
   >
-    <!-- Loading state -->
+    <p v-if="props.loading" class="sr-only" aria-live="polite">
+      Loading weather data
+    </p>
+
     <template v-if="props.loading">
       <div class="skeleton-header">
         <div class="skeleton skeleton--eyebrow" />
         <div class="skeleton skeleton--title" />
         <div class="skeleton skeleton--condition" />
       </div>
+
       <div class="skeleton-temperature">
         <div class="skeleton skeleton--icon" />
         <div class="skeleton skeleton--temp" />
       </div>
+
       <div class="weather-summary">
-        <div v-for="index in 8" :key="index" class="skeleton-tile">
+        <div
+          v-for="index in 8"
+          :key="index"
+          class="skeleton-tile"
+        >
           <div class="skeleton skeleton--label" />
           <div class="skeleton skeleton--value" />
         </div>
       </div>
     </template>
 
-    <!-- Weather loaded state -->
     <template v-else-if="props.weather">
       <div class="weather-main">
         <div class="weather-location">
           <p class="eyebrow">Current weather</p>
+
           <div class="location-title">
             <img
               class="country-flag"
@@ -57,8 +70,10 @@ function formatTemperature(value: number) {
             >
             <h2>{{ props.weather.location.name }}, {{ props.weather.location.country }}</h2>
           </div>
+
           <p class="condition">{{ props.weather.description }}</p>
         </div>
+
         <div class="weather-visual-wrap">
           <WeatherVisual
             :condition="props.weather.description"
@@ -67,12 +82,14 @@ function formatTemperature(value: number) {
           <div class="temperature">
             <img
               :src="weatherIconUrl(props.weather.icon)"
-              :alt="props.weather.description"
+              alt=""
+              aria-hidden="true"
             >
             <strong>{{ formatTemperature(props.weather.temperature) }}</strong>
           </div>
         </div>
       </div>
+
       <div class="weather-summary">
         <div>
           <span>Feels like</span>
@@ -107,13 +124,12 @@ function formatTemperature(value: number) {
           <strong>{{ props.weather.sunset }}</strong>
         </div>
       </div>
+
       <p class="weather-meta">
-        Coordinates: {{ props.weather.location.latitude.toFixed(4) }},
-        {{ props.weather.location.longitude.toFixed(4) }}
+        Coordinates: {{ props.weather.location.latitude.toFixed(4) }}, {{ props.weather.location.longitude.toFixed(4) }}
       </p>
     </template>
 
-    <!-- Empty state -->
     <div v-else class="weather-empty">
       <p class="eyebrow">Current weather</p>
       <h2>Choose a location to get started</h2>
@@ -121,6 +137,7 @@ function formatTemperature(value: number) {
     </div>
   </section>
 </template>
+
 <style scoped>
 .weather-card--stable {
   min-height: 430px;
@@ -249,6 +266,18 @@ function formatTemperature(value: number) {
 .skeleton--value {
   width: 70%;
   height: 18px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @keyframes shimmer {
