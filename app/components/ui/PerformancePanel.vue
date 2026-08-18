@@ -41,6 +41,7 @@ const navigation = ref<PerformanceNavigationTiming | null>(null)
 const appMountTime = ref<number | null>(null)
 const loadedScripts = ref(0)
 const loadedScriptBytes = ref(0)
+let metricsInterval: number | undefined
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
@@ -57,16 +58,24 @@ function refreshRuntimeMetrics() {
   duplicateRequests.value = getDuplicateApiRequestCount()
 
   const entries = performance.getEntriesByType('navigation')
-  navigation.value = (entries[0] as PerformanceNavigationTiming | undefined) ?? null
+  navigation.value =
+    (entries[0] as PerformanceNavigationTiming | undefined) ?? null
 
   const mountMark = performance.getEntriesByName('app-mounted')[0]
   appMountTime.value = mountMark?.startTime ?? null
 
-  const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
-  const scripts = resources.filter((resource) => resource.name.includes('/_nuxt/') && resource.name.endsWith('.js'))
+  const resources = performance.getEntriesByType(
+    'resource',
+  ) as PerformanceResourceTiming[]
+  const scripts = resources.filter(
+    (resource) =>
+      resource.name.includes('/_nuxt/') && resource.name.endsWith('.js'),
+  )
+
   loadedScripts.value = scripts.length
   loadedScriptBytes.value = scripts.reduce(
-    (total, resource) => total + (resource.transferSize || resource.encodedBodySize || 0),
+    (total, resource) =>
+      total + (resource.transferSize || resource.encodedBodySize || 0),
     0,
   )
 }
@@ -80,9 +89,12 @@ async function loadBundleReport() {
       ? config.app.baseURL
       : `${config.app.baseURL}/`
 
-    bundleReport.value = await $fetch<BundleReport>(`${baseURL}performance/bundle.json`, {
-      cache: 'no-store',
-    })
+    bundleReport.value = await $fetch<BundleReport>(
+      `${baseURL}performance/bundle.json`,
+      {
+        cache: 'no-store',
+      },
+    )
   } catch {
     bundleError.value = true
   } finally {
@@ -93,9 +105,13 @@ async function loadBundleReport() {
 onMounted(async () => {
   refreshRuntimeMetrics()
   await loadBundleReport()
+  metricsInterval = window.setInterval(refreshRuntimeMetrics, 1000)
+})
 
-  const interval = window.setInterval(refreshRuntimeMetrics, 1000)
-  onBeforeUnmount(() => window.clearInterval(interval))
+onBeforeUnmount(() => {
+  if (metricsInterval) {
+    window.clearInterval(metricsInterval)
+  }
 })
 </script>
 
