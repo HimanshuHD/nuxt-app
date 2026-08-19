@@ -7,7 +7,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <>
+  <div>
     <button
       v-if="!isOpen"
       class="performance-trigger"
@@ -19,7 +19,7 @@ onMounted(() => {
     </button>
 
     <LazyPerformancePanel v-if="isOpen" @close="isOpen = false" />
-  </>
+  </div>
 </template>
 
 <style scoped>

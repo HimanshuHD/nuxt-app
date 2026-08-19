@@ -3,6 +3,8 @@ import PerformanceLauncher from '~/components/ui/PerformanceLauncher.vue'
 </script>
 
 <template>
-  <slot />
-  <PerformanceLauncher />
+  <div>
+    <slot />
+    <PerformanceLauncher />
+  </div>
 </template>
