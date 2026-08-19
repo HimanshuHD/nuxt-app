@@ -1,6 +1,10 @@
 <script setup lang="ts">
 const isOpen = ref(false)
 
+const PerformancePanel = defineAsyncComponent(
+  () => import('./PerformancePanel.vue'),
+)
+
 onMounted(() => {
   performance.mark('app-mounted')
 })
@@ -18,7 +22,11 @@ onMounted(() => {
       Performance
     </button>
 
-    <LazyPerformancePanel v-if="isOpen" @close="isOpen = false" />
+    <component
+      :is="PerformancePanel"
+      v-if="isOpen"
+      @close="isOpen = false"
+    />
   </div>
 </template>
 
